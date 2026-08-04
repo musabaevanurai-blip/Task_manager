@@ -1,87 +1,103 @@
-import { useEffect, useState } from "react";
-import styles from "./TaskForm.module.css";
+import { useState, useEffect } from "react";
+// import {
+//   addTask,
+//   updateTask,
+// } from "../firebase/firebase";
+import styles from "./TaskForm.module.css"
 
-const TaskForm = ({ onAddTask, onUpdateTask, editingTask }) => {
-  const [task, setTask] = useState({
-    title: "",
-    description: "",
-    status: "pending",
-  });
+function TaskForm({ editingTask, setEditingTask }) {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [status, setStatus] = useState("pending");
 
   useEffect(() => {
     if (editingTask) {
-      setTask(editingTask);
-    } else {
-      setTask({
-        title: "",
-        description: "",
-        status: "pending",
-      });
+      setTitle(editingTask.title);
+      setDescription(editingTask.description);
+      setStatus(editingTask.status);
     }
   }, [editingTask]);
 
-  const handleChange = (e) => {
-    setTask({
-      ...task,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!task.title.trim()) {
+    if (!title.trim()) {
       alert("Введите название задачи");
       return;
     }
 
-    if (editingTask) {
-      onUpdateTask(task);
-    } else {
-      onAddTask(task);
-    }
+    const task = {
+      title,
+      description,
+      status,
+    };
 
-    setTask({
-      title: "",
-      description: "",
-      status: "pending",
-    });
+    try {
+      if (editingTask) {
+        await updateTask(editingTask.id, task);
+        setEditingTask(null);
+      } else {
+        await addTask(task);
+      }
+
+      setTitle("");
+      setDescription("");
+      setStatus("pending");
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit}>
-      <h2>{editingTask ? "Редактировать задачу" : "Новая задача"}</h2>
+    <form className={styles.taskForm} onSubmit={handleSubmit}>
+      <h2>
+        {editingTask
+          ? "Редактировать задачу"
+          : "Добавить задачу"}
+      </h2>
 
       <input
         type="text"
-        name="title"
-        placeholder="Название задачи"
-        value={task.title}
-        onChange={handleChange}
+        placeholder="Название"
+        value={title}
+        onChange={(e) =>
+          setTitle(e.target.value)
+        }
       />
 
       <textarea
-        name="description"
         placeholder="Описание"
-        value={task.description}
-        onChange={handleChange}
+        value={description}
+        onChange={(e) =>
+          setDescription(e.target.value)
+        }
       />
-
       <select
-        name="status"
-        value={task.status}
-        onChange={handleChange}
+        value={status}
+        onChange={(e) =>
+          setStatus(e.target.value)
+        }
       >
-        <option value="pending">Pending</option>
-        <option value="in-progress">In Progress</option>
-        <option value="done">Done</option>
+        <option value="pending">
+          Pending
+        </option>
+
+        <option value="in-progress">
+          In Progress
+        </option>
+
+        <option value="done">
+          Done
+        </option>
       </select>
 
       <button type="submit">
-        {editingTask ? "Сохранить" : "Добавить"}
+        {editingTask
+          ? "Сохранить"
+          : "Добавить"}
       </button>
     </form>
   );
-};
+}
 
 export default TaskForm;
