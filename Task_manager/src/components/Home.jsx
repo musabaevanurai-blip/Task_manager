@@ -9,7 +9,7 @@ const START_TASKS = [
     createdAt: "2026-07-27T08:30:00",
   },
   {
-    id: 2,
+    id: 2,git 
     title: "10 minutes meditation",
     completed: false,
     createdAt: "2026-07-27T09:30:00",
